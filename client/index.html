@@ -2,19 +2,20 @@
 <html>
 <head>
 	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="style.css">
 	<title>Вход</title>
 </head>
 <body>
-	<div>
-		<p>Вход в систему</p>
-		<form>
-			<p>логин</p>
-			<input type="text" name ="user_login"><br>
+	<div class="form_style">
+		<p class="entry_text_mes">Вход в систему</p>
+		<form id="login_form">
+			<p class="labels">логин</p>
+			<input type="text" name ="user_login" class="part_form"><br>
 			<p class="labels">пароль</p>
-			<input type="password" name="user_password">
+			<input type="password" name="user_password" class="part_form" id = "password">
 			<p></p>
 			<input type="submit" name="button_submit" value="Вход">
-			<a href="" class=>Регистрация</a>
+			<a href="register.html" class="href_reg">Регистрация</a>
 		</form>
 		<p id="warning_message"></p>
 	</div>
