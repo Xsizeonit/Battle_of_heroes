@@ -24,15 +24,23 @@ function sendData(data, serverURL) {
 	let xhr = new XMLHttpRequest();
 	let json_data = JSON.stringify(data);
 	
+	xhr.onreadystatechange = function() {
+    if (xhr.readyState == XMLHttpRequest.DONE) {
+        alert(xhr.responseText);
+		}
+	}
+	
 	xhr.open("POST", serverURL);
 	
 	xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
 	
 	xhr.send(json_data);
-	
+	/*
 	if (xhr.status != 200) {
 		console.log(xhr.status + ': ' + xhr.statusText);
 	} else {
+		console.log("Ok");
 		console.log(xhr.responseText);
 	}
+	*/
 }
