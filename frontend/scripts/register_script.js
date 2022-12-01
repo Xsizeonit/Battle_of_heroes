@@ -41,7 +41,7 @@ function handleFormSubmit(event) {
 		sendData(userInput, serverUrl);
 	}
 	else {
-		errorMes.style.color = '#bd1217';
+		errorMessage.style.color = '#bd1217';
 		if(result_compare === false)
 			errorMessage.innerHTML = 'Пароли не совпадают!';
 		else
