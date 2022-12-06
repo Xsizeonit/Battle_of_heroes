@@ -26,7 +26,7 @@ function handleFormSubmit(event) {
 	userInput = prepareDataToSend(userInput);
 
 	if(userInput != false) {
-		let serverUrl = "index.php";
+		let serverUrl = "../";
 		sendData(userInput, serverUrl);
 	}
 	else {

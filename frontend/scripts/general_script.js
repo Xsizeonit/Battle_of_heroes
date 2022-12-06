@@ -30,17 +30,17 @@ function sendData(data, serverURL) {
 		}
 	}
 	
-	xhr.open("POST", serverURL);
+	xhr.open("POST", "../../");
 	
 	xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
 	
 	xhr.send(json_data);
-	/*
+	
 	if (xhr.status != 200) {
 		console.log(xhr.status + ': ' + xhr.statusText);
 	} else {
 		console.log("Ok");
 		console.log(xhr.responseText);
 	}
-	*/
+
 }

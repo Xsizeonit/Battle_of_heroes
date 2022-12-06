@@ -37,7 +37,7 @@ function handleFormSubmit(event) {
 	let result = userInput && result_compare;
 
 	if(result != false) {
-		let serverUrl = "";
+		let serverUrl = "../";
 		sendData(userInput, serverUrl);
 	}
 	else {
