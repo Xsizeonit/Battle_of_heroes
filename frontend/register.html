@@ -7,23 +7,17 @@
 	<title>Регистрация</title>
 </head>
 <body>
-	<div class="form_style">
-		<p class="entry_text_mes">Регистрация</p>
-		<form id="register_form">
-			<p class="labels">логин</p>
-			<input type="text" name ="user_name" class="part_form"><br>
-			<p class="labels">пароль</p>
-			<input type="password" name="user_password" class="part_form">
-			<p class="labels">повторите пароль</p>
-			<input type="password" name="user_password_replay" class="part_form">
-			<p></p>
-			<input type="submit" name="button_submit" value="Зарегистрироваться">
-			<a href="index.html" class="href_reg">Войти</a>
-		</form>
-		<p id="error_message"></p>
+	<div class="container">
+		<div class="form_block">
+			<h1>Регистрация</h1>
+			<input type="text" placeholder="Логин">
+			<input type="password" placeholder="Пароль">
+			<input type="password" placeholder="Повторите пароль">
+			<input type="submit" value="Зарегистрироваться">
+			<a href="index.html" class="link">Войти</a>
+		</div>
 	</div>
 	<script type="text/javascript" src="scripts/general_script.js"></script>
 	<script type="text/javascript" src="scripts/register_script.js"></script>
 </body>
 </html>
-
