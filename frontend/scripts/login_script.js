@@ -26,8 +26,7 @@ function handleFormSubmit(event) {
 	userInput = prepareDataToSend(userInput);
 
 	if(userInput != false) {
-		let serverUrl = "../";
-		sendData(userInput, serverUrl);
+		sendData(userInput);
 	}
 	else {
 		errorMessage.style.color = '#bd1217';

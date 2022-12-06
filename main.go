@@ -15,6 +15,7 @@ type test_struct struct {
 func home(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
+		//w.WriteHeader(http.StatusOK)
 		fmt.Println("frontend" + r.URL.Path)
 		if(r.URL.Path == "/") {
 			http.ServeFile(w, r, "frontend/index.html")
@@ -22,6 +23,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			http.ServeFile(w, r, "frontend" + r.URL.Path)
 		}
 	case "POST":
+		w.WriteHeader(http.StatusOK)
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			panic(err)

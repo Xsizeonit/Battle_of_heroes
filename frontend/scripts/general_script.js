@@ -20,27 +20,22 @@ function prepareDataToSend(obj) {
 }
 
 
-function sendData(data, serverURL) {
+function sendData(data) {
 	let xhr = new XMLHttpRequest();
 	let json_data = JSON.stringify(data);
 	
-	xhr.onreadystatechange = function() {
-    if (xhr.readyState == XMLHttpRequest.DONE) {
-        alert(xhr.responseText);
-		}
-	}
-	
 	xhr.open("POST", "../../");
-	
 	xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
 	
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState !== 4) return; 
+		
+		if (xhr.status != 200) {
+			console.log(xhr.status + ': ' + xhr.statusText);
+		} else {
+			console.log("Ok");
+			console.log(xhr.responseText);
+		}
+	};
 	xhr.send(json_data);
-	
-	if (xhr.status != 200) {
-		console.log(xhr.status + ': ' + xhr.statusText);
-	} else {
-		console.log("Ok");
-		console.log(xhr.responseText);
-	}
-
 }

@@ -37,8 +37,7 @@ function handleFormSubmit(event) {
 	let result = userInput && result_compare;
 
 	if(result != false) {
-		let serverUrl = "../";
-		sendData(userInput, serverUrl);
+		sendData(userInput);
 	}
 	else {
 		errorMessage.style.color = '#bd1217';
