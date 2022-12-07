@@ -8,14 +8,15 @@
 </head>
 <body>
 	<div class="container">
-		<div class="form_block">
+		<form class="form_block" id="login_form">
 			<h1>Вход</h1>
 			<input type="text" placeholder="Логин">
 			<input type="password" placeholder="Пароль">
 			<input type="submit" value="Вход">
 			<a href="register.html" class="link">Зарегистрироваться</a>
 			<a href="#" class="link">Забыли пароль?</a>
-		</div>
+			<p id="error_message"></p>
+		</form>
 	</div>
 	<script type="text/javascript" src="scripts/general_script.js"></script>
 	<script type="text/javascript" src="scripts/login_script.js"></script>

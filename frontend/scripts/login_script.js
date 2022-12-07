@@ -16,6 +16,8 @@ function handleFormSubmit(event) {
 		userName: appForm.elements[0].value,
 		userPassword: appForm.elements[1].value
 	};
+	
+	console.log("Ok");
 
 	/*
 	 * Enter user data inro function prepareDataToSend(), that ckeck
