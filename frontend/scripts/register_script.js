@@ -13,18 +13,18 @@ function handleFormSubmit(event) {
 	 * errors in user inputing. Plus reset warning text to delete previous
 	 * error message.
 	 */
-	let errorMessage = document.getElementById('error_message');
+	let errorMessage = document.getElementById('register_error_message');
 	errorMessage.innerHTML = '';
 
 	//Save input user data (login, password and password replay) into object named userInput
 	let userInput = {
-		type: "registration",
-		userName: appForm.elements[0].value,
-		userPassword: appForm.elements[1].value,
+		Type: "registration",
+		Login: appForm.elements[0].value,
+		Password: appForm.elements[1].value,
 	};
 
 	//Compare user passwod and it replay. If they matches - return true, otherwise - return false
-	let result_compare = equPasswordsInput(userInput.userPassword, appForm.elements[2].value);
+	let result_compare = equPasswordsInput(userInput.Password, appForm.elements[2].value);
 
 	/*
 	 * Enter user data inro function prepareDataToSend(), that ckeck

@@ -7,14 +7,14 @@ function handleFormSubmit(event) {
 	 * errors in user inputing. Plus reset warning text to delete previous
 	 * error message.
 	 */
-	let errorMessage = document.getElementById('error_message');
+	let errorMessage = document.getElementById('login_error_message');
 	errorMessage.innerHTML = '';
 
 	//Save input user data (login and password) into object named userInput
 	let userInput = {
-		type: "login",
-		userName: appForm.elements[0].value,
-		userPassword: appForm.elements[1].value
+		Type: "login",
+		Login: appForm.elements[0].value,
+		Password: appForm.elements[1].value
 	};
 	
 	console.log("Ok");
