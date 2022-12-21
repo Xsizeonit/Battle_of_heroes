@@ -4,6 +4,44 @@ function equPasswordsInput(userPassword, userPasswordReplay) {
 	return false;
 }
 
+function stringIsEmpty(str) {
+	if(str === '')
+		return true;
+	return false;
+}
+
+function isSpaceInString(str) {
+	for(let index in str)
+		if(str[index] === " ")
+			return true;
+	return false;
+}
+
+//If string is empry or contains at least one space - error, return false in calling function
+function prepareDataToSend(obj) {
+	if(obj.Password != appRegForm[2].value) {
+		errorFunc("Пароли не совпадают");
+		return false;
+	}
+		
+	for(let key in obj){
+		if(stringIsEmpty(obj[key]) == true) {
+			errorFunc("Все поля должны быть заполненны");
+			return false;
+		}
+		if(isSpaceInString(obj[key]) == true) {
+			errorFunc("Логин и пароль не должны содержать пробелы");
+			return false;
+		}
+	}
+	return true;
+}
+
+function errorFunc(textError) {
+	errorRegLabel.style.color = "#bd1217";
+	errorRegLabel.innerHTML = textError;
+}
+
 function handleFormSubmit(event) {
 	//Denie to reload page after button has pressed
 	event.preventDefault();
@@ -19,12 +57,10 @@ function handleFormSubmit(event) {
 	//Save input user data (login, password and password replay) into object named userInput
 	let userInput = {
 		Type: "registration",
-		Login: appForm.elements[0].value,
-		Password: appForm.elements[1].value,
+		Login: appRegForm.elements[0].value,
+		Password: appRegForm.elements[1].value,
 	};
 
-	//Compare user passwod and it replay. If they matches - return true, otherwise - return false
-	let result_compare = equPasswordsInput(userInput.Password, appForm.elements[2].value);
 
 	/*
 	 * Enter user data inro function prepareDataToSend(), that ckeck
@@ -32,25 +68,15 @@ function handleFormSubmit(event) {
 	 * object userInput with user data if all Ok (login and password is not empty and
 	 * do not have spaces) and return false otherwise.
 	 */
-	userInput = prepareDataToSend(userInput);
+	let result = prepareDataToSend(userInput);
 
-	let result = userInput && result_compare;
-
-	if(result != false) {
-		sendData(userInput);
-	}
-	else {
-		errorMessage.style.color = '#bd1217';
-		if(result_compare === false)
-			errorMessage.innerHTML = 'Пароли не совпадают!';
-		else
-			errorMessage.innerHTML = 'Логин и пароль не могут быть пустыми и не могут содержать пробелы!';
-	}
+	if(result == true)
+		sendData(userInput, errorFunc);
 }
 
 //Save login form into variable appForm
-const appForm = document.getElementById('register_form');
+const appRegForm = document.getElementById("register_form");
+let errorRegLabel = document.getElementById("register_error_message");
 
 //If button is pressed - go to the function handleFormSubmit
-appForm.addEventListener('submit', handleFormSubmit);
-
+appRegForm.addEventListener("submit", handleFormSubmit);

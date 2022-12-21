@@ -1,3 +1,36 @@
+function stringIsEmpty(str) {
+	if(str === '')
+		return true;
+	return false;
+}
+
+function isSpaceInString(str) {
+	for(let index in str)
+		if(str[index] === " ")
+			return true;
+	return false;
+}
+
+//If string is empry or contains at least one space - error, return false in calling function
+function prepareDataToSend(obj) {
+	for(let key in obj){
+		if(stringIsEmpty(obj[key]) == true) {
+			errorFunc("Все поля должны быть заполненны");
+			return false;
+		}
+		if(isSpaceInString(obj[key]) == true) {
+			errorFunc("Логин и пароль не должны содержать пробелы");
+			return false;
+		}
+	}
+	return true;
+}
+
+function errorFunc(textError) {
+	errorLoginLabel.style.color = "#bd1217";
+	errorLoginLabel.innerHTML = textError;
+}
+
 function handleFormSubmit(event) {
 	//Denie to reload page after button has pressed
 	event.preventDefault();
@@ -7,17 +40,14 @@ function handleFormSubmit(event) {
 	 * errors in user inputing. Plus reset warning text to delete previous
 	 * error message.
 	 */
-	let errorMessage = document.getElementById('login_error_message');
-	errorMessage.innerHTML = '';
+	errorLoginLabel.innerHTML = "";
 
 	//Save input user data (login and password) into object named userInput
 	let userInput = {
 		Type: "login",
-		Login: appForm.elements[0].value,
-		Password: appForm.elements[1].value
+		Login: appLoginForm[0].value,
+		Password: appLoginForm[1].value
 	};
-	
-	console.log("Ok");
 
 	/*
 	 * Enter user data inro function prepareDataToSend(), that ckeck
@@ -25,19 +55,15 @@ function handleFormSubmit(event) {
 	 * object userInput with user data if all Ok (login and password is not empty and
 	 * do not have spaces) and return false otherwise.
 	 */
-	userInput = prepareDataToSend(userInput);
+	let result = prepareDataToSend(userInput);
 
-	if(userInput != false) {
-		sendData(userInput);
-	}
-	else {
-		errorMessage.style.color = '#bd1217';
-		errorMessage.innerHTML = 'Логин и пароль не могут быть пустыми и не могут содержать пробелы!';
-	}
+	if(result == true)
+		sendData(userInput, errorFunc);
 }
 
 //Save login form into variable appForm
-const appForm = document.getElementById('login_form');
+const appLoginForm = document.getElementById("login_form");
+let errorLoginLabel = document.getElementById("login_error_message");
 
 //If button is pressed - go to the function handleFormSubmit
-appForm.addEventListener('submit', handleFormSubmit);
+appLoginForm.addEventListener("submit", handleFormSubmit);

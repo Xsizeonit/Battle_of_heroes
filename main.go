@@ -17,7 +17,6 @@ type user_info struct {
 func parse_post_request(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("mysql", "root:root@/USERS")
 	if err != nil {
-		fmt.Println("Error")
 		panic(err)
 	}
 	defer db.Close()
@@ -34,7 +33,6 @@ func parse_post_request(w http.ResponseWriter, r *http.Request) {
 		row.Scan(&user_right_password)
 		
 		if(user_right_password == user_input.Password) {
-			fmt.Println("Ok")
 			//Websocket
 		} else {
 			w.WriteHeader(245)
