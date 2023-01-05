@@ -62,6 +62,7 @@ func parse_post_request(w http.ResponseWriter, r *http.Request) {
 }
 
 func parse_socket(w http.ResponseWriter, r *http.Request){
+	log.Print("New socket")
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Print("Error during connection upgrade: ", err);
@@ -69,9 +70,9 @@ func parse_socket(w http.ResponseWriter, r *http.Request){
 	}
 
 	defer conn.Close()
-	
 	for {
 		messageType, message, err := conn.ReadMessage()
+		log.Print("New message")
 		
 		if err != nil {
 			log.Print("Error during connection reading: ", err)
