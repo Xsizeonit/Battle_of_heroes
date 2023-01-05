@@ -1,17 +1,24 @@
 package main
 
 import (
-	"fmt"
 	"encoding/json"
     "net/http"
     "database/sql"
+    "log"
     _ "github.com/go-sql-driver/mysql"
+    "github.com/gorilla/websocket"
 )
 
 type user_info struct {
     Type string
     Login string
     Password string
+}
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+        return true
+    },
 }
 
 func parse_post_request(w http.ResponseWriter, r *http.Request) {
@@ -33,7 +40,7 @@ func parse_post_request(w http.ResponseWriter, r *http.Request) {
 		row.Scan(&user_right_password)
 		
 		if(user_right_password == user_input.Password) {
-			//Websocket
+			w.WriteHeader(244)
 		} else {
 			w.WriteHeader(245)
 		}
@@ -54,10 +61,38 @@ func parse_post_request(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func parse_socket(w http.ResponseWriter, r *http.Request){
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Print("Error during connection upgrade: ", err);
+		return
+	}
+
+	defer conn.Close()
+	
+	for {
+		messageType, message, err := conn.ReadMessage()
+		
+		if err != nil {
+			log.Print("Error during connection reading: ", err)
+			break
+		}
+		log.Printf("Received: %s", message)
+		err = conn.WriteMessage(messageType, message)
+		if err != nil {
+			log.Print("Error during connection writing: ", err)
+			break
+		}
+	}
+}
+
 func home(w http.ResponseWriter, r *http.Request) {
+	log.Print(r.URL.Path)
 	switch r.Method {
 	case "GET":
-		if(r.URL.Path == "/") {
+		if(r.URL.Path == "/socket") {
+			parse_socket(w, r)
+		} else if(r.URL.Path == "/") {
 			http.ServeFile(w, r, "frontend/index.html")
 		} else {
 			http.ServeFile(w, r, "frontend" + r.URL.Path)

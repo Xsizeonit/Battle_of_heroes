@@ -1,0 +1,21 @@
+body {
+	margin: 0;
+	font-family: sans-serif;
+	background: radial-gradient(circle, rgba(63,94,251,1) 0%, rgba(183,75,210,1) 100%, rgba(252,70,107,1) 100%);
+	min-height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.container {
+	width: 450px;
+	height: 500px;
+	background: #e9eef5;
+	border-radius: 15%;
+	box-shadow: -15px 18px 18px -9px rgba(0,0,0,0.75);
+}
+
+.table {
+	text-align: center;
+}
