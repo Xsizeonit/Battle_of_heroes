@@ -2,9 +2,10 @@ const socket = new WebSocket("ws://192.168.0.103:3333/socket");
 let userData;
 let us = []
 let btns = {}
+
+let userData = localStorage.getItem("data")
+
 socket.onopen = function(e) {
-	userData = localStorage.getItem("data")
-	console.log("userData: " + userData)
 	socket.send(userData);
 }
 
@@ -23,5 +24,9 @@ socket.onmessage = function(e) {
 		new_btn.innerHTML = e.data;
 		container.appendChild(new_btn);
 		btns[e.data] = new_btn;
+		btns[e.data].onclick = function() {
+			console.log("send login " + e.data)
+			socket.send(e.data)
+		}
 	}
 }

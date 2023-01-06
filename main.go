@@ -17,10 +17,10 @@ type user_info struct {
 
 type user struct {
 	User user_info
-	Active bool
 	InGame bool
 	IsLogin bool
 	Conn *websocket.Conn
+	FriendConn *websocket.Conn
 }
 
 var list_users_to_websocket []user_info
@@ -92,6 +92,7 @@ func parse_socket(w http.ResponseWriter, r *http.Request){
 	ptr_users := &user{
 		Conn: conn,
 		IsLogin: false,
+		InGame: false,
 	}
 	
 	save_socket_users = append(save_socket_users, ptr_users)
@@ -118,12 +119,12 @@ func (i *user) startThread(){
 		}()
 		
 		for {
-			i.read()
+			i.listen()
 		}
 	}()
 }
 
-func (i *user) read() {
+func (i *user) listen() {
 	_, b, err := i.Conn.ReadMessage()
 	
 	if err != nil {
@@ -150,15 +151,21 @@ func (i *user) read() {
 			ex_user.Conn.WriteMessage(websocket.TextMessage, []byte(i.User.Login))
 			i.Conn.WriteMessage(websocket.TextMessage, []byte(ex_user.User.Login))
 		}
+	} else {
+		var friend_user *user
+		right_user := false
+		friend_login := string(b)
+		for _, ex_user := range save_socket_users {
+			if(friend_login == ex_user.User.Login) {
+				friend_user = ex_user
+				right_user = true
+				break
+			}
+		}
+		if(right_user == true) {
+			log.Printf("User %s want to play with user %s", i.User.Login, friend_user.User.Login)
+		}
 	}
-	/*
-	json.Unmarshal(b, i.User)
-	for _, users := range save_socket_users {
-		//users.writeMsg(users.User)
-		//msg, _ := json.Marshal(users.User)
-		users.Conn.WriteMessage(websocket.TextMessage, []byte(users.User.Login))
-	}
-	*/
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
