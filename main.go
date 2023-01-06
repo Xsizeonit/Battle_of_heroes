@@ -15,6 +15,17 @@ type user_info struct {
     Password string
 }
 
+type user struct {
+	User user_info
+	Active bool
+	InGame bool
+	IsLogin bool
+	Conn *websocket.Conn
+}
+
+var list_users_to_websocket []user_info
+var save_socket_users []*user
+
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
         return true
@@ -41,6 +52,7 @@ func parse_post_request(w http.ResponseWriter, r *http.Request) {
 		
 		if(user_right_password == user_input.Password) {
 			w.WriteHeader(244)
+			list_users_to_websocket = append(list_users_to_websocket, user_input)
 		} else {
 			w.WriteHeader(245)
 		}
@@ -62,33 +74,94 @@ func parse_post_request(w http.ResponseWriter, r *http.Request) {
 }
 
 func parse_socket(w http.ResponseWriter, r *http.Request){
-	log.Print("New socket")
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Print("Error during connection upgrade: ", err);
-		return
+	log.Println("Create new socket")
+	if (save_socket_users == nil) {
+		save_socket_users = make([]*user, 0)
 	}
+	
+	defer func() {
+		err := recover()
+		if err != nil {
+			log.Println(err)
+		}
+		r.Body.Close()
+	}()
+	
+	conn, _ := upgrader.Upgrade(w, r, nil)
+	
+	ptr_users := &user{
+		Conn: conn,
+		IsLogin: false,
+	}
+	
+	save_socket_users = append(save_socket_users, ptr_users)
+	ptr_users.startThread()
+}
 
-	defer conn.Close()
-	for {
-		messageType, message, err := conn.ReadMessage()
-		log.Print("New message")
+func (i *user) startThread(){
+	go func() {
+		defer func() {
+			var ind int;
+			for index, ex_user := range save_socket_users {
+				if(ex_user == i){
+					ind = index;
+					continue;
+				}
+				ex_user.Conn.WriteMessage(websocket.TextMessage, []byte("-" + i.User.Login))
+			}
+			i.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(1000, ""))
+			save_socket_users = append(save_socket_users[:ind], save_socket_users[ind+1:]...)
+			err := recover()
+			if err != nil {
+				log.Println(err)
+			}
+		}()
 		
-		if err != nil {
-			log.Print("Error during connection reading: ", err)
-			break
+		for {
+			i.read()
 		}
-		log.Printf("Received: %s", message)
-		err = conn.WriteMessage(messageType, message)
-		if err != nil {
-			log.Print("Error during connection writing: ", err)
-			break
+	}()
+}
+
+func (i *user) read() {
+	_, b, err := i.Conn.ReadMessage()
+	
+	if err != nil {
+		panic(err)
+	}
+	
+	if(i.IsLogin == false) {
+		var new_user user_info
+		json.Unmarshal(b, &new_user)
+		
+		for index, ex_user := range list_users_to_websocket {
+			if(new_user == ex_user) {
+				i.User = new_user
+				i.IsLogin = true
+				list_users_to_websocket = append(list_users_to_websocket[:index], list_users_to_websocket[index+1:]...)
+				log.Printf("New user with login: %s", i.User.Login)
+				break
+			}
+		}
+		for _, ex_user := range save_socket_users {
+			if(ex_user == i) {
+				continue
+			}
+			ex_user.Conn.WriteMessage(websocket.TextMessage, []byte(i.User.Login))
+			i.Conn.WriteMessage(websocket.TextMessage, []byte(ex_user.User.Login))
 		}
 	}
+	/*
+	json.Unmarshal(b, i.User)
+	for _, users := range save_socket_users {
+		//users.writeMsg(users.User)
+		//msg, _ := json.Marshal(users.User)
+		users.Conn.WriteMessage(websocket.TextMessage, []byte(users.User.Login))
+	}
+	*/
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
-	log.Print(r.URL.Path)
 	switch r.Method {
 	case "GET":
 		if(r.URL.Path == "/socket") {
