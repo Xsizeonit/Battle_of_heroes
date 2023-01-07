@@ -95,6 +95,8 @@ func (i *user) startThread(){
 			//Close connection anyway
 			i.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(1000, ""))
 			
+			log.Printf("Delete user %s", save_socket_users[ind].User.Login)
+			
 			//delete user from array
 			save_socket_users = append(save_socket_users[:ind], save_socket_users[ind+1:]...)
 			
@@ -194,6 +196,8 @@ func (i *user) listen() {
 		if(ans == "1") {
 			log.Printf("User %s ready to fight with user %s", i.User.Login, i.FriendUser.User.Login)
 			i.FriendUser.Conn.WriteMessage(websocket.TextMessage, []byte("@" + i.FriendUser.User.Login))
+			i.WantPlay = false
+			i.FriendUser.WantPlay = false
 		} else if(ans == "0"){
 			log.Printf("User %s NOT ready to fight with user %s", i.User.Login, i.FriendUser.User.Login)
 			i.FriendUser.Conn.WriteMessage(websocket.TextMessage, []byte("#" + i.FriendUser.User.Login))
