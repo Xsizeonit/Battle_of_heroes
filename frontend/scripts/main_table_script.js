@@ -3,8 +3,9 @@ function main_table() {
 	const socket = new WebSocket("ws://192.168.0.103:3333/socket");
 	localStorage.setItem("socket", socket);
 	
-	const jsonUserData = localStorage.getItem("data");
-	
+	const jsonData = localStorage.getItem("data");
+	const userData = JSON.parse(jsonData);
+	document.getElementById("nickname").innerHTML = "(" + userData.Login + ")";
 	//Create constant cantainer to add buttons into menu in future
 	const container = document.getElementById("container");
 	
@@ -16,7 +17,7 @@ function main_table() {
 	let buttons = {};
 	
 	/*
-	 *  Create and save in localStorage variable InGame that indicates
+	 *  Create and save in localStorage variable inGame that indicates
 	 *  denieded access other users (except friend/rival) to current user
 	 */
 	let inGame = false;
@@ -24,13 +25,20 @@ function main_table() {
 	
 	//If socket has opened - sending users data to server that it has all info about user
 	socket.onopen = (openEvent) => {
-		socket.send(jsonUserData);
+		socket.send(jsonData);
 	}
 	
 	socket.onmessage = (onmessageEvent) => {
-		if(onmessageEvent.data == "100") {
+		if((inGame == false) && (onmessageEvent.data[0] == "+")) {
 			inGame = true;
-			//Game
+			let user_ans = window.confirm("Пользователь " + onmessageEvent.data.slice(1) + " хочет сыграть с вами");
+			if(user_ans == true) {
+				socket.send("1");
+				//Game
+			} else {
+				socket.send("0");
+				inGame = false;
+			}
 		} else if((inGame == false) && (onmessageEvent.data[0] == "-")) {
 			
 			/*
@@ -54,6 +62,13 @@ function main_table() {
 					return;
 				}
 			});
+		} else if((inGame == true) && (onmessageEvent.data[0] == "@")) {
+			window.alert("Игра с пользователем " + onmessageEvent.data.slice(1) + " началась!");
+			//Game
+			inGame = false;
+		} else if((inGame == true) && (onmessageEvent.data[0] == "#")) {
+			window.alert("Пользователь " + onmessageEvent.data.slice(1) + " отверг предложение сыграть");
+			inGame = false;
 		} else if((inGame == false) && (users_nicknames.includes(onmessageEvent.data) == false)) {
 			
 			/*
@@ -79,6 +94,7 @@ function main_table() {
 			 *   server
 			 */
 			buttons[onmessageEvent.data].onclick = function() {
+				inGame = true;
 				socket.send(onmessageEvent.data)
 			}
 		}

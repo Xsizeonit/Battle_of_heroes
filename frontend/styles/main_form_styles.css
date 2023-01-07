@@ -31,3 +31,12 @@ body {
 .container button:hover{
   background: #a83232;
 }
+
+.container h2{
+	margin-bottom: 2px;
+}
+
+.container h3{
+	margin-top: 2px;
+	color: blue;
+}

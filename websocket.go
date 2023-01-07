@@ -26,8 +26,9 @@ type user struct {
 	User user_info
 	InGame bool
 	IsLogin bool
+	WantPlay bool
 	Conn *websocket.Conn
-	FriendConn *websocket.Conn
+	FriendUser *user
 }
 
 var save_socket_users []*user
@@ -62,6 +63,7 @@ func parse_socket(w http.ResponseWriter, r *http.Request){
 		Conn: conn,
 		IsLogin: false,
 		InGame: false,
+		WantPlay: false,
 	}
 	
 	//Save new user and start new thread
@@ -151,13 +153,15 @@ func (i *user) listen() {
 			ex_user.Conn.WriteMessage(websocket.TextMessage, []byte(i.User.Login))
 			i.Conn.WriteMessage(websocket.TextMessage, []byte(ex_user.User.Login))
 		}
-	} else {
+	} else if(i.WantPlay == false){
 		/*
 		 *   If user already has loginned that it may only send other user
 		 *   request to play with him
 		 */
-		var friend_user *user
+		i.WantPlay = true
+		//var friend_user *user
 		right_user := false
+		//friend_user_accept := false
 		
 		//Get nickname other user
 		friend_login := string(b)
@@ -165,7 +169,9 @@ func (i *user) listen() {
 		//Find this user from exsiting users
 		for _, ex_user := range save_socket_users {
 			if(friend_login == ex_user.User.Login) {
-				friend_user = ex_user
+				//friend_user = ex_user
+				i.FriendUser = ex_user
+				ex_user.FriendUser = i
 				right_user = true
 				break
 			}
@@ -176,9 +182,23 @@ func (i *user) listen() {
 		 *   FriendConn connection other user)
 		 */
 		if(right_user == true) {
-			i.FriendConn = friend_user.Conn
-			friend_user.FriendConn = i.Conn
+			i.FriendUser.WantPlay = true
+			i.FriendUser.Conn.WriteMessage(websocket.TextMessage, []byte("+" + i.User.Login))
 			
+			//i.FriendConn = friend_user.Conn
+			//i.FriendUser = i
+			log.Printf("Now user %s and user %s trying to connect", i.User.Login, i.FriendUser.User.Login)
+		}
+	} else if(i.WantPlay == true) {
+		ans := string(b)
+		if(ans == "1") {
+			log.Printf("User %s ready to fight with user %s", i.User.Login, i.FriendUser.User.Login)
+			i.FriendUser.Conn.WriteMessage(websocket.TextMessage, []byte("@" + i.FriendUser.User.Login))
+		} else if(ans == "0"){
+			log.Printf("User %s NOT ready to fight with user %s", i.User.Login, i.FriendUser.User.Login)
+			i.FriendUser.Conn.WriteMessage(websocket.TextMessage, []byte("#" + i.FriendUser.User.Login))
+			i.WantPlay = false
+			i.FriendUser.WantPlay = false
 		}
 	}
 }

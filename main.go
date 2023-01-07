@@ -5,7 +5,6 @@ import (
     "net/http"
     "database/sql"
     _ "github.com/go-sql-driver/mysql"
-    "github.com/gorilla/websocket"
 )
 
 //Main information about user that connection to server

@@ -11,7 +11,7 @@
 function sendData(data, errorFunc) {
 	let xhr = new XMLHttpRequest();
 	let jsonData = JSON.stringify(data);
-	localStorage.setItem("data", jsonData)
+	localStorage.setItem("data", jsonData);
 	
 	xhr.open("POST", "../../");
 	xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
