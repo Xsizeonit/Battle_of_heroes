@@ -1,4 +1,13 @@
-
+/*
+ *  1. Creating XMLHttpRequest object that allow us to send ajax request
+ *  2. Transfer data into json form that more comfortable
+ *  3. Save json form of user data to use this data in future
+ *  4. 244 - code if login and password is correct
+ *     245 - code if user not exsist or inputing password not correct (error)
+ *     246 - code if user try to input exsisting login in registation form (error)
+ *     247 - code if user successfuly had registered
+ *  5. If server has returned code 244 (successful log in) - open page main_table.html
+ */
 function sendData(data, errorFunc) {
 	let xhr = new XMLHttpRequest();
 	let jsonData = JSON.stringify(data);

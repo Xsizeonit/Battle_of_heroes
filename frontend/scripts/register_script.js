@@ -37,6 +37,7 @@ function prepareDataToSend(obj) {
 	return true;
 }
 
+//Error function is accepting error message text and display it with html red text
 function errorFunc(textError) {
 	errorRegLabel.style.color = "#bd1217";
 	errorRegLabel.innerHTML = textError;

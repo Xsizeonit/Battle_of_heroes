@@ -4,46 +4,48 @@ import (
 	"encoding/json"
     "net/http"
     "database/sql"
-    "log"
     _ "github.com/go-sql-driver/mysql"
     "github.com/gorilla/websocket"
 )
 
+//Main information about user that connection to server
 type user_info struct {
     Type string
     Login string
     Password string
 }
 
-type user struct {
-	User user_info
-	InGame bool
-	IsLogin bool
-	Conn *websocket.Conn
-	FriendConn *websocket.Conn
-}
-
+/*
+ *   All successful log in users server will be keeping in list_users_to_websocket
+ *   to protectect server from unauthorized connecting to websocket. When
+ *   user successful log in and create succussefuly websocket connection he
+ *   send to server again his data (login and password) with using websocket connection
+ *   to confirm his data.
+ */
 var list_users_to_websocket []user_info
-var save_socket_users []*user
-
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-        return true
-    },
-}
 
 func parse_post_request(w http.ResponseWriter, r *http.Request) {
+	//Trying to connect to mysql database
 	db, err := sql.Open("mysql", "root:root@/USERS")
 	if err != nil {
 		panic(err)
 	}
+	
+	//Close connect to database when function pase_post_request() have finished
 	defer db.Close()
-
+	
+	//Give and transform camming data from json form into struct user_info
 	var user_input user_info
 	json.NewDecoder(r.Body).Decode(&user_input)
 	
 	switch user_input.Type {
 	case "login":
+		/*
+		 *   Get password that corresponds inputing user login.
+		 *   If user has inputed right password - send back code 244 (successful log in)
+		 *   and add user to list users for websocket connection.
+		 *   Else send back code 245 (not right inputing password).
+		 */
 		row, _ := db.Query("select hash_password from users where login=\"" + user_input.Login + "\"")
 		row.Next()
 		
@@ -57,6 +59,12 @@ func parse_post_request(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(245)
 		}
 	case "registration":
+		/*
+		 *   Check absense inputing registration login in database.
+		 *   If inputing login has existed in database - send code 246 (users
+		 *   with this login is existing).
+		 *   Else add new user in database and send back 247 code (successful registation)
+		 */
 		row, _ := db.Query("select login from users where login=\"" + user_input.Login + "\"")
 		row.Next()
 		
@@ -73,101 +81,20 @@ func parse_post_request(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func parse_socket(w http.ResponseWriter, r *http.Request){
-	log.Println("Create new socket")
-	if (save_socket_users == nil) {
-		save_socket_users = make([]*user, 0)
-	}
-	
-	defer func() {
-		err := recover()
-		if err != nil {
-			log.Println(err)
-		}
-		r.Body.Close()
-	}()
-	
-	conn, _ := upgrader.Upgrade(w, r, nil)
-	
-	ptr_users := &user{
-		Conn: conn,
-		IsLogin: false,
-		InGame: false,
-	}
-	
-	save_socket_users = append(save_socket_users, ptr_users)
-	ptr_users.startThread()
-}
 
-func (i *user) startThread(){
-	go func() {
-		defer func() {
-			var ind int;
-			for index, ex_user := range save_socket_users {
-				if(ex_user == i){
-					ind = index;
-					continue;
-				}
-				ex_user.Conn.WriteMessage(websocket.TextMessage, []byte("-" + i.User.Login))
-			}
-			i.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(1000, ""))
-			save_socket_users = append(save_socket_users[:ind], save_socket_users[ind+1:]...)
-			err := recover()
-			if err != nil {
-				log.Println(err)
-			}
-		}()
-		
-		for {
-			i.listen()
-		}
-	}()
-}
-
-func (i *user) listen() {
-	_, b, err := i.Conn.ReadMessage()
-	
-	if err != nil {
-		panic(err)
-	}
-	
-	if(i.IsLogin == false) {
-		var new_user user_info
-		json.Unmarshal(b, &new_user)
-		
-		for index, ex_user := range list_users_to_websocket {
-			if(new_user == ex_user) {
-				i.User = new_user
-				i.IsLogin = true
-				list_users_to_websocket = append(list_users_to_websocket[:index], list_users_to_websocket[index+1:]...)
-				log.Printf("New user with login: %s", i.User.Login)
-				break
-			}
-		}
-		for _, ex_user := range save_socket_users {
-			if(ex_user == i) {
-				continue
-			}
-			ex_user.Conn.WriteMessage(websocket.TextMessage, []byte(i.User.Login))
-			i.Conn.WriteMessage(websocket.TextMessage, []byte(ex_user.User.Login))
-		}
-	} else {
-		var friend_user *user
-		right_user := false
-		friend_login := string(b)
-		for _, ex_user := range save_socket_users {
-			if(friend_login == ex_user.User.Login) {
-				friend_user = ex_user
-				right_user = true
-				break
-			}
-		}
-		if(right_user == true) {
-			log.Printf("User %s want to play with user %s", i.User.Login, friend_user.User.Login)
-		}
-	}
-}
-
+/*
+ *   Analyse user requests
+ *   If he send post requets then we riese parse_post_request function.
+ * 
+ *   If user want to connect to server websocket then server rise spical function
+ *   parse_socket to do this. All websocket methods is placed into websocket.go file.
+ * 
+ *   Else if user connect to main page (to /) then we give him index.html
+ *   file that keep login form.
+ * 
+ *   Else if user want to get other files (other html files or scripts and styles)
+ *   server send to client this files.
+ */
 func home(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
